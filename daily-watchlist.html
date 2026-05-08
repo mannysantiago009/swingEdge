@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SwingEdge PRO — Daily Watchlist</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #05080b;
+    --bg2:     #0a0f14;
+    --bg3:     #0f161d;
+    --border:  #162030;
+    --border2: #1e2f40;
+    --green:   #05f58a;
+    --green2:  #03c46e;
+    --green-dim: rgba(5,245,138,0.07);
+    --red:     #ff2d55;
+    --red-dim: rgba(255,45,85,0.07);
+    --amber:   #ffcc00;
+    --amber-dim: rgba(255,204,0,0.07);
+    --blue:    #0af0ff;
+    --blue-dim: rgba(10,240,255,0.07);
+    --gold:    #c9963a;
+    --text:    #ddeeff;
+    --text2:   #6a8ba0;
+    --text3:   #2a4055;
+    --rank1:   #c9963a;
+    --rank2:   #8a9ba8;
+    --rank3:   #7a5c3a;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid bg */
+  body::after {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(10,240,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(10,240,255,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap { position:relative; z-index:1; }
+
+  /* TOP BAR */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,8,11,0.95);
+    backdrop-filter: blur(10px);
+    position: sticky; top:0; z-index:100;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 4px;
+    color: var(--text);
+  }
+  .logo em { color: var(--green); font-style:normal; }
+  .logo sup {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--blue);
+    letter-spacing: 2px;
+    vertical-align: top;
+    margin-top: 4px;
+    display: inline-block;
+  }
+
+  .topbar-right {
+    display:flex; align-items:center; gap:20px;
+  }
+
+  .live-badge {
+    display:flex; align-items:center; gap:7px;
+    font-size:10px; letter-spacing:2px; color:var(--text2);
+    text-transform:uppercase;
+  }
+
+  .pulse {
+    width:7px; height:7px; border-radius:50%;
+    background:var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  @keyframes glow {
+    0%,100% { opacity:1; box-shadow:0 0 8px var(--green); }
+    50% { opacity:0.5; box-shadow:none; }
+  }
+
+  .time-display {
+    font-size:12px; color:var(--text3);
+    letter-spacing:1px;
+  }
+
+  /* API KEY SETUP SCREEN */
+  .setup-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .setup-box {
+    width: 100%;
+    max-width: 520px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 48px 40px;
+    text-align: center;
+  }
+
+  .setup-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 5px;
+    margin-bottom: 8px;
+  }
+  .setup-logo em { color: var(--green); font-style:normal; }
+
+  .setup-tagline {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  .setup-step {
+    text-align: left;
+    margin-bottom: 28px;
+  }
+
+  .setup-step-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .step-num {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: var(--blue);
+    flex-shrink: 0;
+  }
+
+  .setup-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    padding: 10px 16px;
+    font-size: 12px;
+    color: var(--blue);
+    text-decoration: none;
+    letter-spacing: 1px;
+    transition: border-color 0.2s;
+    width: 100%;
+    justify-content: center;
+  }
+  .setup-link:hover { border-color: var(--blue); }
+
+  .key-input-wrap {
+    position: relative;
+  }
+
+  .key-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    padding: 12px 44px 12px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    letter-spacing: 1px;
+    transition: border-color 0.2s;
+  }
+  .key-input:focus { border-color: var(--green); }
+  .key-input::placeholder { color: var(--text3); letter-spacing: 0.5px; }
+
+  .key-toggle {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: var(--text3); cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s;
+  }
+  .key-toggle:hover { color: var(--text2); }
+
+  .key-hint {
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+    text-align: left;
+  }
+
+  .key-hint a { color: var(--blue); text-decoration: none; }
+
+  .setup-btn {
+    width: 100%;
+    background: var(--green);
+    color: #000;
+    border: none;
+    padding: 16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 4px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-top: 32px;
+    transition: all 0.2s;
+  }
+  .setup-btn:hover { background: #00ff99; transform: translateY(-1px); }
+  .setup-btn:active { transform: translateY(0); }
+
+  .setup-security {
+    margin-top: 20px;
+    font-size: 10px;
+    color: var(--text3);
+    line-height: 1.7;
+    letter-spacing: 0.5px;
+  }
+
+  .setup-security span { color: var(--amber); }
+
+  .key-saved-badge {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 1px;
+    margin-top: 8px;
+  }
+
+  /* Change key button in topbar */
+  .change-key-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .change-key-btn:hover { border-color: var(--text2); color: var(--text2); }
+
+  /* HERO */
+  .hero {
+    text-align:center;
+    padding: 64px 24px 48px;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 96px);
+    letter-spacing: 6px;
+    line-height: 0.9;
+    margin-bottom: 16px;
+  }
+
+  .hero-title .line1 { color: var(--text); display:block; }
+  .hero-title .line2 { color: var(--green); display:block; text-shadow: 0 0 40px rgba(5,245,138,0.3); }
+
+  .hero-sub {
+    font-size:13px; color:var(--text2); letter-spacing:2px;
+    text-transform:uppercase; margin-bottom:40px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .hero-sub span { color:var(--blue); }
+
+  /* BIG BUTTON */
+  .scan-btn-wrap { display:flex; justify-content:center; margin-bottom:20px; }
+
+  .scan-btn {
+    background: var(--green);
+    color: #000;
+    border: none;
+    padding: 20px 60px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scan-btn::before {
+    content:'';
+    position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.4s;
+  }
+
+  .scan-btn:hover { background:#00ff99; transform:translateY(-2px); box-shadow:0 8px 30px rgba(5,245,138,0.3); }
+  .scan-btn:hover::before { transform: translateX(100%); }
+  .scan-btn:active { transform:translateY(0); }
+  .scan-btn:disabled { background:var(--text3); color:var(--bg2); cursor:not-allowed; transform:none; box-shadow:none; }
+
+  .scan-note { font-size:11px; color:var(--text3); text-align:center; letter-spacing:1px; }
+
+  /* PROGRESS */
+  .progress-wrap {
+    max-width:600px; margin:32px auto;
+    display:none;
+    padding: 0 24px;
+  }
+
+  .progress-steps {
+    display:flex; flex-direction:column; gap:12px;
+    padding: 24px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius:4px;
+  }
+
+  .progress-step {
+    display:flex; align-items:center; gap:14px;
+    font-size:12px; color:var(--text3);
+    transition: color 0.3s;
+  }
+
+  .progress-step.active { color:var(--text2); }
+  .progress-step.done { color:var(--green); }
+
+  .step-icon {
+    width:20px; height:20px; border-radius:50%;
+    background:var(--bg3); border:1px solid var(--border2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; flex-shrink:0;
+    transition: all 0.3s;
+  }
+
+  .progress-step.active .step-icon {
+    border-color:var(--blue); color:var(--blue);
+    box-shadow:0 0 8px rgba(10,240,255,0.3);
+    animation: spinStep 1s linear infinite;
+  }
+
+  .progress-step.done .step-icon {
+    background: var(--green-dim);
+    border-color:var(--green); color:var(--green);
+    animation:none;
+  }
+
+  @keyframes spinStep {
+    0%,100%{content:'◐'} 25%{content:'◓'} 50%{content:'◑'} 75%{content:'◒'}
+  }
+
+  .progress-bar-outer {
+    height:3px; background:var(--border2); border-radius:2px;
+    margin-top:16px; overflow:hidden;
+  }
+
+  .progress-bar-inner {
+    height:100%; background:var(--green);
+    border-radius:2px;
+    transition:width 0.5s ease;
+    box-shadow:0 0 8px var(--green);
+    width:0%;
+  }
+
+  /* RESULTS SECTION */
+  .results-section {
+    max-width:1200px; margin:0 auto; padding:0 24px 80px;
+    display:none;
+  }
+
+  .results-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:24px; padding-bottom:16px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .results-title {
+    font-family:'Bebas Neue',sans-serif;
+    font-size:32px; letter-spacing:4px; color:var(--text);
+  }
+
+  .results-date { font-size:11px; color:var(--text3); letter-spacing:2px; }
+
+  .market-mood {
+    padding:8px 20px;
+    border-radius:3px;
+    font-size:12px; letter-spacing:2px;
+    font-family:'Bebas Neue',sans-serif;
+    font-size:16px;
+  }
+
+  .market-mood.bullish { background:var(--green-dim); border:1px solid var(--green); color:var(--green); }
+  .market-mood.bearish { background:var(--red-dim); border:1px solid var(--red); color:var(--red); }
+  .market-mood.neutral { background:var(--amber-dim); border:1px solid var(--amber); color:var(--amber); }
+
+  /* MARKET BRIEF */
+  .market-brief {
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-left:3px solid var(--blue);
+    border-radius:4px;
+    padding:20px 24px;
+    margin-bottom:28px;
+    font-size:13px;
+    color:var(--text2);
+    line-height:1.8;
+    font-family:'DM Sans',sans-serif;
+  }
+
+  .market-brief-label {
+    font-family:'DM Mono',monospace;
+    font-size:9px; letter-spacing:3px; color:var(--blue);
+    margin-bottom:10px; text-transform:uppercase;
+  }
+
+  /* STOCK CARDS */
+  .stock-cards { display:flex; flex-direction:column; gap:20px; }
+
+  .stock-card {
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:4px;
+    overflow:hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    animation: cardIn 0.4s ease forwards;
+    opacity:0;
+    transform: translateY(16px);
+  }
+
+  @keyframes cardIn {
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .stock-card:nth-child(1) { animation-delay:0.1s; }
+  .stock-card:nth-child(2) { animation-delay:0.25s; }
+  .stock-card:nth-child(3) { animation-delay:0.4s; }
+
+  .stock-card:hover { border-color:var(--border2); box-shadow:0 4px 30px rgba(0,0,0,0.4); }
+
+  .stock-card.rank-1 { border-color:rgba(201,150,58,0.4); }
+  .stock-card.rank-1:hover { border-color:var(--gold); box-shadow:0 4px 30px rgba(201,150,58,0.15); }
+  .stock-card.rank-2 { border-color:rgba(138,155,168,0.3); }
+  .stock-card.rank-3 { border-color:rgba(122,92,58,0.3); }
+
+  /* Card top bar */
+  .card-topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .rank-badge {
+    font-family:'Bebas Neue',sans-serif;
+    font-size:13px; letter-spacing:2px;
+    padding:4px 12px;
+    border-radius:2px;
+    margin-right:16px;
+  }
+
+  .rank-1 .rank-badge { background:rgba(201,150,58,0.15); color:var(--gold); border:1px solid rgba(201,150,58,0.4); }
+  .rank-2 .rank-badge { background:rgba(138,155,168,0.1); color:#8a9ba8; border:1px solid rgba(138,155,168,0.3); }
+  .rank-3 .rank-badge { background:rgba(122,92,58,0.1); color:#c07a4a; border:1px solid rgba(122,92,58,0.3); }
+
+  .ticker-block { display:flex; align-items:baseline; gap:12px; }
+
+  .ticker-sym {
+    font-family:'Bebas Neue',sans-serif;
+    font-size:36px; letter-spacing:4px;
+    line-height:1;
+  }
+
+  .ticker-name { font-size:12px; color:var(--text2); }
+
+  .price-block { text-align:right; }
+  .price-current { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:2px; }
+  .price-change { font-size:12px; margin-top:2px; }
+  .price-change.up { color:var(--green); }
+  .price-change.down { color:var(--red); }
+
+  .verdict-chip {
+    font-family:'Bebas Neue',sans-serif;
+    font-size:18px; letter-spacing:3px;
+    padding:8px 20px; border-radius:3px;
+  }
+
+  .verdict-chip.trade { background:var(--green-dim); color:var(--green); border:1px solid var(--green); }
+  .verdict-chip.watch { background:var(--amber-dim); color:var(--amber); border:1px solid var(--amber); }
+  .verdict-chip.skip  { background:var(--red-dim);   color:var(--red);   border:1px solid var(--red);   }
+
+  /* Card body */
+  .card-body-grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    border-bottom:1px solid var(--border);
+  }
+
+  .body-section {
+    padding:20px 24px;
+    border-right:1px solid var(--border);
+  }
+
+  .body-section:last-child { border-right:none; }
+
+  .section-label {
+    font-size:9px; letter-spacing:2px; color:var(--text3);
+    text-transform:uppercase; margin-bottom:14px;
+  }
+
+  /* Entry params */
+  .entry-params { display:flex; flex-direction:column; gap:10px; }
+
+  .entry-row { display:flex; justify-content:space-between; align-items:center; }
+  .entry-key { font-size:10px; color:var(--text3); letter-spacing:1px; }
+  .entry-val { font-size:13px; font-weight:500; }
+  .entry-val.green { color:var(--green); }
+  .entry-val.red { color:var(--red); }
+  .entry-val.amber { color:var(--amber); }
+  .entry-val.blue { color:var(--blue); }
+
+  /* Score ring */
+  .score-ring-wrap { display:flex; align-items:center; gap:16px; }
+
+  .ring-svg { width:70px; height:70px; flex-shrink:0; }
+  .ring-track { fill:none; stroke:var(--border2); stroke-width:8; }
+  .ring-fill { fill:none; stroke-width:8; stroke-linecap:round;
+    stroke-dasharray:188.5;
+    stroke-dashoffset:188.5;
+    transform:rotate(-90deg); transform-origin:50% 50%;
+    transition:stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1);
+  }
+  .ring-text { font-family:'Bebas Neue',sans-serif; font-size:20px; fill:currentColor; text-anchor:middle; dominant-baseline:middle; }
+
+  .score-breakdown { flex:1; display:flex; flex-direction:column; gap:8px; }
+
+  .mini-bar-row { display:flex; flex-direction:column; gap:3px; }
+  .mini-bar-label { font-size:9px; color:var(--text3); letter-spacing:1px; display:flex; justify-content:space-between; }
+  .mini-bar-track { height:3px; background:var(--border2); border-radius:2px; overflow:hidden; }
+  .mini-bar-fill { height:100%; border-radius:2px; transition:width 1.2s ease; width:0; }
+
+  /* KPIs */
+  .kpi-mini-grid { display:flex; flex-wrap:wrap; gap:5px; }
+
+  .kpi-pill {
+    font-size:10px; padding:3px 8px; border-radius:2px;
+    border:1px solid; letter-spacing:0.5px;
+    display:flex; flex-direction:column; align-items:center; gap:1px;
+  }
+
+  .kpi-pill .kn { font-size:8px; opacity:0.6; }
+  .kpi-pill.g { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+  .kpi-pill.r { background:var(--red-dim); border-color:var(--red); color:var(--red); }
+  .kpi-pill.a { background:var(--amber-dim); border-color:var(--amber); color:var(--amber); }
+  .kpi-pill.n { background:var(--bg3); border-color:var(--border2); color:var(--text2); }
+
+  /* Catalyst list */
+  .catalyst-list { display:flex; flex-direction:column; gap:8px; }
+
+  .cat-item { display:flex; gap:8px; font-size:11px; color:var(--text2); line-height:1.5; }
+  .cat-dot { width:5px; height:5px; border-radius:50%; background:var(--amber); flex-shrink:0; margin-top:4px; }
+
+  /* Card footer */
+  .card-footer {
+    padding:16px 24px;
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+
+  .bull-pill {
+    background:var(--green-dim); border:1px solid rgba(5,245,138,0.2);
+    border-radius:3px; padding:12px 16px;
+  }
+
+  .bear-pill {
+    background:var(--red-dim); border:1px solid rgba(255,45,85,0.2);
+    border-radius:3px; padding:12px 16px;
+  }
+
+  .pill-head { font-size:9px; letter-spacing:2px; margin-bottom:6px; text-transform:uppercase; }
+  .bull-pill .pill-head { color:var(--green); }
+  .bear-pill .pill-head { color:var(--red); }
+  .pill-text { font-size:11px; color:var(--text2); line-height:1.6; font-family:'DM Sans',sans-serif; }
+
+  /* Trader brief */
+  .trader-brief {
+    padding:0 24px 20px;
+    font-size:12px; color:var(--text2); line-height:1.8;
+    font-family:'DM Sans',sans-serif;
+    border-top:1px solid var(--border);
+    padding-top:16px;
+  }
+
+  .brief-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--gold); margin-bottom:8px; text-transform:uppercase; }
+
+  /* Expand toggle */
+  .expand-btn {
+    width:100%; padding:12px; background:none; border:none; border-top:1px solid var(--border);
+    color:var(--text3); font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px;
+    cursor:pointer; text-transform:uppercase; transition:color 0.2s, background 0.2s;
+  }
+  .expand-btn:hover { background:var(--bg3); color:var(--text2); }
+
+  .card-detail { display:none; }
+  .card-detail.open { display:block; }
+
+  /* Rescan */
+  .rescan-bar {
+    text-align:center; padding:32px 0 0;
+    display:none;
+  }
+
+  .rescan-btn {
+    background:none; border:1px solid var(--border2); color:var(--text2);
+    padding:12px 32px; font-family:'Bebas Neue',sans-serif;
+    font-size:18px; letter-spacing:3px; border-radius:3px;
+    cursor:pointer; transition:all 0.2s;
+  }
+
+  .rescan-btn:hover { border-color:var(--green); color:var(--green); }
+
+  /* Disclaimer */
+  .disclaimer {
+    max-width:1200px; margin:0 auto;
+    padding:0 24px 40px;
+    font-size:10px; color:var(--text3); line-height:1.7; letter-spacing:0.5px;
+    border-top:1px solid var(--border); padding-top:20px; margin-top:20px;
+  }
+
+  @media(max-width:900px) {
+    .card-body-grid { grid-template-columns:1fr 1fr; }
+    .body-section:nth-child(2) { border-right:none; }
+    .body-section:nth-child(3) { border-top:1px solid var(--border); }
+  }
+
+  @media(max-width:600px) {
+    .card-body-grid { grid-template-columns:1fr; }
+    .body-section { border-right:none !important; border-top:1px solid var(--border); }
+    .topbar { padding:12px 16px; }
+    .hero { padding:40px 16px 32px; }
+    .card-footer { grid-template-columns:1fr; }
+    .card-topbar { flex-wrap:wrap; gap:10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- SETUP SCREEN -->
+  <div class="setup-screen" id="setupScreen">
+    <div class="setup-box">
+      <div class="setup-logo">Swing<em>Edge</em> PRO</div>
+      <div class="setup-tagline">AI-Powered Daily Trade Watchlist</div>
+
+      <div class="setup-step">
+        <div class="setup-step-label"><span class="step-num">1</span> Get your free API key</div>
+        <a class="setup-link" href="https://platform.anthropic.com/api-keys" target="_blank">
+          🔑 &nbsp; Open platform.anthropic.com/api-keys
+        </a>
+        <div class="key-hint" style="margin-top:8px">Sign up free → click <strong style="color:var(--text2)">Create Key</strong> → copy it</div>
+      </div>
+
+      <div class="setup-step">
+        <div class="setup-step-label"><span class="step-num">2</span> Paste your API key below</div>
+        <div class="key-input-wrap">
+          <input class="key-input" id="apiKeyInput" type="password" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
+          <button class="key-toggle" onclick="toggleKeyVisibility()" id="keyToggle">👁</button>
+        </div>
+        <div class="key-hint">Starts with <span style="color:var(--text2)">sk-ant-</span> · Never share this with anyone</div>
+        <div class="key-saved-badge" id="keySavedBadge">✓ &nbsp; Key saved in your browser</div>
+      </div>
+
+      <button class="setup-btn" onclick="saveKeyAndStart()">
+        LAUNCH SWINGEGGE PRO →
+      </button>
+
+      <div class="setup-security">
+        <span>🔒 Your key stays in your browser only.</span><br>
+        It's saved locally and never sent anywhere except directly to Anthropic's API.<br>
+        API costs ~$0.01–0.03 per scan. You control your own usage.
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP (hidden until key entered) -->
+  <div id="mainApp" style="display:none">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="logo">Swing<em>Edge</em> <sup>PRO</sup></div>
+    <div class="topbar-right">
+      <div class="live-badge"><div class="pulse"></div>AI-POWERED LIVE SCAN</div>
+      <div class="time-display" id="clock"></div>
+      <button class="change-key-btn" onclick="changeKey()">⚙ API KEY</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-title">
+      <span class="line1">YOUR DAILY</span>
+      <span class="line2">TRADE WATCHLIST</span>
+    </div>
+    <div class="hero-sub">
+      One click → AI finds today's top movers → analyzes each one → gives you your <span>top 3 trades</span>
+    </div>
+
+    <div class="scan-btn-wrap">
+      <button class="scan-btn" id="scanBtn" onclick="runFullScan()">
+        ▶ &nbsp; RUN TODAY'S SCAN
+      </button>
+    </div>
+    <div class="scan-note">Uses live web data · Takes ~45 seconds · Best run 8–9am before market open</div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-steps" id="progressSteps">
+      <div class="progress-step" id="step1"><div class="step-icon">1</div><span>Scanning market for today's high-volume movers & news catalysts...</span></div>
+      <div class="progress-step" id="step2"><div class="step-icon">2</div><span>Identifying top 5 candidates with strongest momentum signals...</span></div>
+      <div class="progress-step" id="step3"><div class="step-icon">3</div><span>Running deep analysis: financials, catalysts, risk/reward...</span></div>
+      <div class="progress-step" id="step4"><div class="step-icon">4</div><span>Scoring and ranking by swing trade potential...</span></div>
+      <div class="progress-step" id="step5"><div class="step-icon">5</div><span>Building your daily watchlist...</span></div>
+    </div>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-section" id="resultsSection">
+
+    <div class="results-header">
+      <div>
+        <div class="results-title">TODAY'S WATCHLIST</div>
+        <div class="results-date" id="resultsDate"></div>
+      </div>
+      <div class="market-mood" id="marketMood"></div>
+    </div>
+
+    <div class="market-brief" id="marketBrief">
+      <div class="market-brief-label">◈ Market Context</div>
+      <div id="marketBriefText"></div>
+    </div>
+
+    <div class="stock-cards" id="stockCards"></div>
+
+    <div class="rescan-bar" id="rescanBar">
+      <button class="rescan-btn" onclick="runFullScan()">↺ &nbsp; RESCAN FOR TODAY</button>
+    </div>
+
+  </div>
+
+  <div class="disclaimer" id="disclaimer" style="display:none">
+    ⚠ DISCLAIMER: SwingEdge is an AI-powered research tool for educational purposes only. This is NOT financial advice. All trading involves significant risk of loss. Past performance does not guarantee future results. Always do your own due diligence and consult a licensed financial advisor before making investment decisions. Never trade with money you cannot afford to lose.
+  </div>
+
+  </div><!-- /mainApp -->
+
+</div><!-- /wrap -->
+
+<script>
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) +
+    ' ET';
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ── API KEY SETUP ──────────────────────────────────────
+function getStoredKey() {
+  try { return localStorage.getItem('swingEdgeApiKey') || ''; } catch(e) { return ''; }
+}
+
+function saveKey(key) {
+  try { localStorage.setItem('swingEdgeApiKey', key); } catch(e) {}
+}
+
+function toggleKeyVisibility() {
+  const input = document.getElementById('apiKeyInput');
+  const btn = document.getElementById('keyToggle');
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁'; }
+}
+
+function saveKeyAndStart() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    alert('That doesn\'t look like a valid Anthropic API key.\n\nIt should start with: sk-ant-\n\nGo to platform.anthropic.com/api-keys to get yours.');
+    return;
+  }
+  saveKey(key);
+  showMainApp();
+}
+
+function changeKey() {
+  document.getElementById('setupScreen').style.display = 'flex';
+  document.getElementById('mainApp').style.display = 'none';
+  const key = getStoredKey();
+  if (key) {
+    document.getElementById('apiKeyInput').value = key;
+    document.getElementById('keySavedBadge').style.display = 'flex';
+  }
+}
+
+function showMainApp() {
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+}
+
+// On load: check if key already saved
+window.addEventListener('DOMContentLoaded', () => {
+  const key = getStoredKey();
+  if (key) {
+    document.getElementById('apiKeyInput').value = key;
+    document.getElementById('keySavedBadge').style.display = 'flex';
+    showMainApp();
+  }
+});
+// ──────────────────────────────────────────────────────
+
+// Step manager
+let currentStep = 0;
+function setStep(n) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('step' + i);
+    const icon = el.querySelector('.step-icon');
+    if (i < n) {
+      el.className = 'progress-step done';
+      icon.textContent = '✓';
+    } else if (i === n) {
+      el.className = 'progress-step active';
+      icon.textContent = '◐';
+    } else {
+      el.className = 'progress-step';
+      icon.textContent = i;
+    }
+  }
+  document.getElementById('progressBar').style.width = ((n-1)/5*100) + '%';
+}
+
+function colorKPI(key, val) {
+  const IDEAL = {
+    grossMargin:[20,50], opMargin:[10,30], netMargin:[5,20],
+    rev1Y:[20,1e9], cagr3Y:[20,1e9], cagr5Y:[20,1e9],
+    epsGrowth:[20,1e9], ebitdaMargin:[20,1e9], fcfMargin:[10,1e9],
+    pe:[20,40], fwdPe:[20,30], peg:[0.5,1.5], pb:[0.5,1.5],
+    ps:[1,5], evEbitda:[10,20], pfcf:[0,10], roe:[12,1e9], roa:[5,1e9]
+  };
+  if (!val || val==='N/A') return 'n';
+  const num = parseFloat(String(val).replace('%',''));
+  if (isNaN(num)) return 'n';
+  const r = IDEAL[key];
+  if (!r) return 'n';
+  if (num >= r[0] && num <= r[1]) return 'g';
+  const miss = num < r[0] ? (r[0]-num)/r[0] : (num-r[1])/r[1];
+  return miss > 0.3 ? 'r' : 'a';
+}
+
+function animateRing(svgId, value, color) {
+  const circumference = 188.5;
+  const offset = circumference * (1 - Math.min(Math.max(value,0),100)/100);
+  setTimeout(() => {
+    const el = document.getElementById(svgId);
+    if (el) {
+      el.style.strokeDashoffset = offset;
+      el.style.stroke = color;
+    }
+  }, 500);
+}
+
+function animateMiniBars(card) {
+  setTimeout(() => {
+    card.querySelectorAll('.mini-bar-fill').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 600);
+}
+
+function getScoreColor(s) {
+  if (s >= 70) return 'var(--green)';
+  if (s >= 45) return 'var(--amber)';
+  return 'var(--red)';
+}
+
+function buildStockCard(stock, rank) {
+  const rankClass = `rank-${rank}`;
+  const rankLabels = ['🥇 TOP PICK', '🥈 #2 PICK', '🥉 #3 PICK'];
+  const verdictClass = stock.verdict === 'TRADE IT' ? 'trade' : stock.verdict === 'WATCH IT' ? 'watch' : 'skip';
+  const priceChangeClass = (stock.priceChange || '').includes('-') ? 'down' : 'up';
+  const scoreColor = getScoreColor(stock.overallScore);
+
+  const kpiKeys = [
+    ['pe','P/E'],['fwdPe','FWD'],['peg','PEG'],
+    ['grossMargin','GM'],['opMargin','OM'],['netMargin','NM'],
+    ['rev1Y','REV'],['epsGrowth','EPS'],['roe','ROE']
+  ];
+
+  const kpiHtml = kpiKeys.map(([k,label]) => {
+    const v = stock.kpis?.[k] || 'N/A';
+    const cls = colorKPI(k, v);
+    return `<div class="kpi-pill ${cls}"><span class="kn">${label}</span>${v}</div>`;
+  }).join('');
+
+  const catalystHtml = (stock.catalysts||[]).slice(0,3).map(c =>
+    `<div class="cat-item"><div class="cat-dot"></div><span>${c}</span></div>`
+  ).join('');
+
+  const uid = `stock_${rank}`;
+
+  return `
+<div class="stock-card ${rankClass}">
+
+  <div class="card-topbar">
+    <div style="display:flex;align-items:center;gap:0">
+      <span class="rank-badge">${rankLabels[rank-1]}</span>
+      <div class="ticker-block">
+        <span class="ticker-sym">${stock.ticker}</span>
+        <span class="ticker-name">${stock.companyName || ''}</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="price-block">
+        <div class="price-current">${stock.currentPrice || '—'}</div>
+        <div class="price-change ${priceChangeClass}">${stock.priceChange || ''}</div>
+      </div>
+      <div class="verdict-chip ${verdictClass}">${stock.verdict}</div>
+    </div>
+  </div>
+
+  <div class="card-body-grid">
+
+    <!-- Entry params -->
+    <div class="body-section">
+      <div class="section-label">⚡ Entry Setup</div>
+      <div class="entry-params">
+        <div class="entry-row"><span class="entry-key">Entry Zone</span><span class="entry-val blue">${stock.entryPrice||'—'}</span></div>
+        <div class="entry-row"><span class="entry-key">Target (1-2D)</span><span class="entry-val green">${stock.targetPrice||'—'}</span></div>
+        <div class="entry-row"><span class="entry-key">Stop Loss</span><span class="entry-val red">${stock.stopLoss||'—'}</span></div>
+        <div class="entry-row"><span class="entry-key">Risk/Reward</span><span class="entry-val amber">${stock.riskReward||'—'}</span></div>
+        <div class="entry-row"><span class="entry-key">Why Today</span><span class="entry-val" style="font-size:10px;color:var(--text2);text-align:right;max-width:140px">${stock.whyToday||'—'}</span></div>
+      </div>
+    </div>
+
+    <!-- Score -->
+    <div class="body-section">
+      <div class="section-label">◈ Swing Score</div>
+      <div class="score-ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 60 60">
+          <circle class="ring-track" cx="30" cy="30" r="25"/>
+          <circle class="ring-fill" id="${uid}_ring" cx="30" cy="30" r="25"/>
+          <text class="ring-text" x="30" y="30" style="fill:${scoreColor};font-size:14px">${stock.overallScore}</text>
+        </svg>
+        <div class="score-breakdown">
+          <div class="mini-bar-row">
+            <div class="mini-bar-label"><span>Catalyst</span><span>${stock.catalystScore||0}</span></div>
+            <div class="mini-bar-track"><div class="mini-bar-fill" data-w="${stock.catalystScore||0}" style="background:var(--amber)"></div></div>
+          </div>
+          <div class="mini-bar-row">
+            <div class="mini-bar-label"><span>Financials</span><span>${stock.financialScore||0}</span></div>
+            <div class="mini-bar-track"><div class="mini-bar-fill" data-w="${stock.financialScore||0}" style="background:var(--blue)"></div></div>
+          </div>
+          <div class="mini-bar-row">
+            <div class="mini-bar-label"><span>Valuation</span><span>${stock.valuationScore||0}</span></div>
+            <div class="mini-bar-track"><div class="mini-bar-fill" data-w="${stock.valuationScore||0}" style="background:var(--green)"></div></div>
+          </div>
+          <div class="mini-bar-row" style="margin-top:4px">
+            <div class="mini-bar-label"><span style="color:var(--red)">Risk</span><span>${stock.riskScore||0}</span></div>
+            <div class="mini-bar-track"><div class="mini-bar-fill" data-w="${stock.riskScore||0}" style="background:var(--red)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="body-section">
+      <div class="section-label">📊 Key Metrics</div>
+      <div class="kpi-mini-grid">${kpiHtml}</div>
+    </div>
+
+    <!-- Catalysts -->
+    <div class="body-section">
+      <div class="section-label">🔥 Catalysts</div>
+      <div class="catalyst-list">${catalystHtml}</div>
+    </div>
+
+  </div>
+
+  <!-- Bull/Bear -->
+  <div class="card-footer">
+    <div class="bull-pill">
+      <div class="pill-head">▲ Bull Case</div>
+      <div class="pill-text">${stock.bullCase||'—'}</div>
+    </div>
+    <div class="bear-pill">
+      <div class="pill-head">▼ Bear Case</div>
+      <div class="pill-text">${stock.bearCase||'—'}</div>
+    </div>
+  </div>
+
+  <!-- Trader Brief -->
+  <div class="trader-brief">
+    <div class="brief-label">◈ Trader's Brief</div>
+    ${stock.tradersBrief||'—'}
+  </div>
+
+</div>`;
+}
+
+async function runFullScan() {
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true;
+  btn.textContent = 'SCANNING...';
+
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('resultsSection').style.display = 'none';
+  document.getElementById('rescanBar').style.display = 'none';
+  document.getElementById('disclaimer').style.display = 'none';
+
+  // Scroll to progress
+  document.getElementById('progressWrap').scrollIntoView({ behavior:'smooth', block:'center' });
+
+  try {
+    setStep(1);
+    await delay(800);
+    setStep(2);
+    await delay(600);
+    setStep(3);
+
+    const today = new Date().toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+    const prompt = `You are a professional swing trader analyst. Today is ${today}.
+
+Your job: Find the TOP 3 stocks to swing trade TODAY (buy today/tomorrow, sell within 1-2 days).
+
+Use web search to:
+1. Find stocks that are moving significantly today with strong catalysts (earnings beats, FDA approvals, major contracts, analyst upgrades, product launches, news events)
+2. Check pre-market movers and high relative volume stocks
+3. Look for stocks with strong momentum AND a real reason for the move
+4. Verify current prices and recent performance
+
+Select 3 different stocks (different sectors if possible) that have:
+- A clear catalyst TODAY driving the move
+- High relative volume
+- Strong enough fundamentals that it's a real company (not a pump)
+- Good risk/reward setup for a 1-2 day hold
+
+Return ONLY a valid JSON object, no markdown, no explanation:
+
+{
+  "scanDate": "${today}",
+  "marketMood": "BULLISH" or "NEUTRAL" or "BEARISH",
+  "marketContext": "2-3 sentences on what is moving the market today, key themes, sector rotations, macro context",
+  
+  "stocks": [
+    {
+      "ticker": "TICKER",
+      "companyName": "Full Name",
+      "currentPrice": "$XX.XX",
+      "priceChange": "+X.X% today",
+      "whyToday": "One line: exactly why this stock is moving TODAY",
+      
+      "verdict": "TRADE IT" or "WATCH IT" or "SKIP IT",
+      
+      "overallScore": 0-100,
+      "catalystScore": 0-100,
+      "financialScore": 0-100,
+      "valuationScore": 0-100,
+      "riskScore": 0-100,
+      
+      "entryPrice": "e.g. $142-144",
+      "targetPrice": "e.g. $151",
+      "stopLoss": "e.g. $138",
+      "riskReward": "e.g. 1:2.3",
+      
+      "kpis": {
+        "pe": "value or N/A",
+        "fwdPe": "value or N/A",
+        "peg": "value or N/A",
+        "pb": "value or N/A",
+        "ps": "value or N/A",
+        "grossMargin": "value% or N/A",
+        "opMargin": "value% or N/A",
+        "netMargin": "value% or N/A",
+        "rev1Y": "value% or N/A",
+        "cagr3Y": "value% or N/A",
+        "cagr5Y": "value% or N/A",
+        "epsGrowth": "value% or N/A",
+        "ebitdaMargin": "value% or N/A",
+        "fcfMargin": "value% or N/A",
+        "evEbitda": "value or N/A",
+        "pfcf": "value or N/A",
+        "roe": "value% or N/A",
+        "roa": "value% or N/A"
+      },
+      
+      "catalysts": ["Catalyst 1 with specifics", "Catalyst 2", "Catalyst 3"],
+      
+      "bullCase": "2 sentences plain English why it goes up in next 1-2 days",
+      "bearCase": "2 sentences plain English why the trade fails",
+      
+      "tradersBrief": "3-4 sentences: what happened, why it's moving, what to watch at open, key risk level"
+    }
+  ]
+}
+
+Make sure the 3 stocks are ranked #1 (best opportunity) to #3. Use REAL stocks moving TODAY with verified current data.`;
+
+    setStep(4);
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": getStoredKey(),
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 3000,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    setStep(5);
+    await delay(600);
+
+    // Extract JSON
+    let rawText = '';
+    for (const block of (data.content || [])) {
+      if (block.type === 'text') rawText += block.text;
+    }
+
+    let result;
+    try {
+      const match = rawText.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('No JSON');
+      result = JSON.parse(match[0]);
+    } catch(e) {
+      throw new Error('Could not parse scan results. Please try again.');
+    }
+
+    document.getElementById('progressBar').style.width = '100%';
+    await delay(400);
+
+    renderResults(result);
+
+  } catch(err) {
+    document.getElementById('progressWrap').style.display = 'none';
+    alert('Scan error: ' + err.message + '\n\nPlease try again.');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '▶  RUN TODAY\'S SCAN';
+}
+
+function renderResults(data) {
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('resultsSection').style.display = 'block';
+  document.getElementById('rescanBar').style.display = 'block';
+  document.getElementById('disclaimer').style.display = 'block';
+
+  // Header
+  document.getElementById('resultsDate').textContent = data.scanDate || '';
+
+  const moodEl = document.getElementById('marketMood');
+  const mood = (data.marketMood || 'NEUTRAL').toUpperCase();
+  moodEl.textContent = mood === 'BULLISH' ? '▲ BULLISH' : mood === 'BEARISH' ? '▼ BEARISH' : '◆ NEUTRAL';
+  moodEl.className = 'market-mood ' + (mood === 'BULLISH' ? 'bullish' : mood === 'BEARISH' ? 'bearish' : 'neutral');
+
+  document.getElementById('marketBriefText').textContent = data.marketContext || '';
+
+  // Stock cards
+  const container = document.getElementById('stockCards');
+  container.innerHTML = '';
+
+  (data.stocks || []).slice(0,3).forEach((stock, i) => {
+    const rank = i + 1;
+    container.insertAdjacentHTML('beforeend', buildStockCard(stock, rank));
+
+    // Animate ring
+    const scoreColor = getScoreColor(stock.overallScore);
+    animateRing(`stock_${rank}_ring`, stock.overallScore, scoreColor);
+  });
+
+  // Animate mini bars
+  setTimeout(() => {
+    document.querySelectorAll('.mini-bar-fill').forEach(el => {
+      el.style.width = (el.dataset.w || 0) + '%';
+    });
+  }, 700);
+
+  document.getElementById('resultsSection').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
